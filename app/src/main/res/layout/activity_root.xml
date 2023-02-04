@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.RootActivity"
+    android:background="@color/gray">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/gray"
+            app:title="Заголовок"
+            app:titleTextAppearance="@style/TitleStyle"
+            app:titleCentered="false"
+            app:navigationIcon="@drawable/order"
+            app:menu="@menu/top_app_bar"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_marginTop="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/recycler"
+        app:layout_anchorGravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/warning"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Список товаров пуст!"
+            android:textAlignment="center"
+            android:fontFamily="@font/ubuntu_regular"
+            android:textSize="19sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:visibility="invisible"
+            android:id="@+id/hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/hint"
+            android:textAlignment="center"
+            android:textColor="@color/mint"
+            android:fontFamily="@font/ubuntu_regular"
+            android:layout_marginTop="10dp"
+            android:textSize="15sp"/>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
