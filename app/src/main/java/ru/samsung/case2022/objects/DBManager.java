@@ -47,4 +47,17 @@ public class DBManager {
     private void createTablesIfNeedBe() {
         db.execSQL("CREATE TABLE IF NOT EXISTS PRODUCTS (NAME TEXT, COST FLOAT);");
     }
+
+    public void replaceProduct(Product oldProduct, String newName) {
+        String oldName = oldProduct.getName();
+        ContentValues values = new ContentValues();
+        values.put("NAME", newName);
+        db.update("PRODUCTS", values, "NAME = ?", new String[]{oldName});
+    }
+
+    public void deleteProduct(Product product) {
+        String name = product.getName();
+        db.delete("PRODUCTS", "NAME = ?", new String[]{name});
+    }
+
 }

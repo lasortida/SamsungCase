@@ -15,23 +15,30 @@ import ru.samsung.case2022.R;
 import ru.samsung.case2022.objects.DBManager;
 import ru.samsung.case2022.objects.Product;
 
-public class AddProductActivity extends AppCompatActivity {
+public class EditActivity extends AppCompatActivity {
 
-    private ActionMenuItemView scan;
+    private ActionMenuItemView scan, add;
     private MaterialToolbar toolbar;
-    private MaterialButton save;
+    private MaterialButton save, remove;
     private TextInputEditText editText;
     private static DBManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_product);
+        setContentView(R.layout.activity_edit);
+
+        Product oldProduct = (Product) getIntent().getExtras().get("PRODUCT");
+
         scan = findViewById(R.id.scan);
         toolbar = findViewById(R.id.topAppBar);
         save = findViewById(R.id.buttonSave);
         editText = findViewById(R.id.editText);
+        remove = findViewById(R.id.remove);
         manager = DBManager.getInstance(this);
+
+        editText.setText(oldProduct.getName());
+
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -41,26 +48,29 @@ public class AddProductActivity extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String text = editText.getText().toString();
-                if (text.equals("") || text.equals(" ")) {
+                String newName = editText.getText().toString();
+                if (newName.equals("") || newName.equals(" ")) {
                     Snackbar.make(save, "Вы ввели пустое значение", Snackbar.LENGTH_SHORT)
                             .setAction("Сохранить", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    createProduct(text);
+                                    manager.replaceProduct(oldProduct, newName);
                                     onBackPressed();
                                 }
                             }).show();
                 } else {
-                    createProduct(text);
+                    manager.replaceProduct(oldProduct, newName);
                     onBackPressed();
                 }
             }
         });
+        remove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                manager.deleteProduct(oldProduct);
+                onBackPressed();
+            }
+        });
     }
 
-    public void createProduct(String name) {
-        Product product = new Product(name);
-        manager.addProduct(product);
-    }
 }

@@ -1,6 +1,7 @@
 package ru.samsung.case2022.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 
 import ru.samsung.case2022.R;
 import ru.samsung.case2022.objects.Product;
+import ru.samsung.case2022.ui.EditActivity;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
 
@@ -57,6 +59,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
         public void bind(Product product) {
             productName.setText(product.getName());
+            card.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    context.startActivity(new Intent(context, EditActivity.class).putExtra("PRODUCT", product));
+                }
+            });
         }
     }
 }

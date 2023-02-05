@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import ru.samsung.case2022.R;
 import ru.samsung.case2022.adapters.ListAdapter;
@@ -64,8 +63,16 @@ public class RootActivity extends AppCompatActivity {
         super.onResume();
         ArrayList<Product> list = getProducts();
         if (list.size() != 0) {
+            recycler.setVisibility(View.VISIBLE
+            );
+            warning.setVisibility(View.INVISIBLE);
+            hint.setVisibility(View.INVISIBLE);
             ListAdapter adapter = new ListAdapter(list);
             recycler.swapAdapter(adapter, true);
+        } else {
+            warning.setVisibility(View.VISIBLE);
+            hint.setVisibility(View.VISIBLE);
+            recycler.setVisibility(View.INVISIBLE);
         }
     }
 
