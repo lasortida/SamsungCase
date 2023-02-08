@@ -54,6 +54,12 @@ public class RootActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), AddProductActivity.class));
             }
         };
+        scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+            }
+        });
         add.setOnClickListener(onClickListener);
         hint.setOnClickListener(onClickListener);
     }
