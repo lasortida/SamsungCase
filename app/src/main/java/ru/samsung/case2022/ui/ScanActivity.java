@@ -26,6 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,6 +45,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Multipart;
 import ru.samsung.case2022.R;
+import ru.samsung.case2022.objects.DBManager;
 import ru.samsung.case2022.objects.RecResult;
 
 public class ScanActivity extends AppCompatActivity {
@@ -52,6 +55,7 @@ public class ScanActivity extends AppCompatActivity {
     private MaterialButton recognize, cancel;
     private TextView message;
     private ProgressBar progressBar;
+    private static DBManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +66,8 @@ public class ScanActivity extends AppCompatActivity {
         cancel = findViewById(R.id.cancel);
         message = findViewById(R.id.textViewMessage);
         progressBar = findViewById(R.id.progressBar);
+
+        manager = DBManager.getInstance(this);
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Uri path = createImage();
@@ -84,7 +90,7 @@ public class ScanActivity extends AppCompatActivity {
         resultLauncher.launch(intent);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.94:80/")
+                .baseUrl("http://192.168.1.94/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -97,21 +103,44 @@ public class ScanActivity extends AppCompatActivity {
                 message.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
                 Drawable drawable = preview.getDrawable();
-                File file = getImageFile(drawable, path);
+                File file = getImageFile(drawable);
                 MultipartBody.Part body = formPart(file);
                 Call<RecResult> call = service.recognize(body);
                 call.enqueue(new Callback<RecResult>() {
                     @Override
                     public void onResponse(Call<RecResult> call, Response<RecResult> response) {
-                        RecResult result = response.body();
-                        Log.d("SIGN", result.naming[0]);
-                        deleteFile(path);
+                        if (response.isSuccessful()) {
+                            deleteFile(path);
+                            RecResult result = response.body();
+                            try {
+                                handleResponse(result);
+                                onBackPressed();
+                            } catch (Exception e) {
+                                // Перефоткать
+                                Log.d("SIGN", "bad photo!");
+                                if (result.naming.length > 0) {
+                                    Log.d("SIGN", result.naming[0]);
+                                } else {
+                                    Log.d("SIGN", "size - 0");
+                                }
+                            }
+                        } else {
+                            Log.d("SIGN", response.message());
+                            Snackbar.make(recognize, "Не удалось соединиться с сервером! Попробуйте ещё раз!", BaseTransientBottomBar.LENGTH_SHORT)
+                                    .show();
+                            preview.setVisibility(View.VISIBLE);
+                            message.setVisibility(View.INVISIBLE);
+                            progressBar.setVisibility(View.INVISIBLE);
+                        }
                     }
 
                     @Override
                     public void onFailure(Call<RecResult> call, Throwable t) {
-                        Log.d("SIGN", t.getLocalizedMessage());
-                        deleteFile(path);
+                        Snackbar.make(recognize, "Не удалось соединиться с сервером! Попробуйте ещё раз!", BaseTransientBottomBar.LENGTH_SHORT)
+                                .show();
+                        preview.setVisibility(View.VISIBLE);
+                        message.setVisibility(View.INVISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
             }
@@ -119,12 +148,12 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     private MultipartBody.Part formPart(File file) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("image", file.getName(), requestBody);
         return body;
     }
 
-    private File getImageFile(Drawable drawable, Uri uri) {
+    private File getImageFile(Drawable drawable) {
         BitmapDrawable bdrawable = (BitmapDrawable) drawable;
         Bitmap bitmap = bdrawable.getBitmap();
         File file = getApplicationContext().getFileStreamPath("recognition.jpg");
@@ -151,5 +180,10 @@ public class ScanActivity extends AppCompatActivity {
     private void deleteFile(Uri uri) {
         ContentResolver resolver = getContentResolver();
         resolver.delete(uri, null, null);
+    }
+
+    public void handleResponse(RecResult result) throws Exception {
+        int index = manager.contains(result);
+        manager.deleteProduct(index);
     }
 }
