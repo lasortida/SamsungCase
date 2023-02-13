@@ -95,12 +95,12 @@ public class DBManager {
 
     private float getProbability(String[] tables, ArrayList<String> predict) {
         float probability = 0;
-        String word = tables[0].toLowerCase(Locale.ROOT);
+        String word = tables[0].toLowerCase(Locale.ROOT).replace('ё', 'е');
         if (predict.contains(word)) {
             probability += 0.4;
         }
         for (int i = 1; i < tables.length; ++i) {
-            word = tables[i].toLowerCase(Locale.ROOT);
+            word = tables[i].toLowerCase(Locale.ROOT).replace('ё', 'е');
             if (predict.contains(word)) {
                 probability += 0.1;
             }
