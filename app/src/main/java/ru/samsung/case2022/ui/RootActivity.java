@@ -7,8 +7,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
@@ -23,6 +27,7 @@ public class RootActivity extends AppCompatActivity {
     private ActionMenuItemView scan, add;
     private TextView warning, hint;
     private static DBManager manager;
+    private ListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,16 +40,17 @@ public class RootActivity extends AppCompatActivity {
         hint = findViewById(R.id.hint);
         manager = DBManager.getInstance(this);
 
-        LinearLayoutManager manager = new LinearLayoutManager(getApplicationContext());
-        recycler.setLayoutManager(manager);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        recycler.setLayoutManager(layoutManager);
         recycler.setHasFixedSize(true);
 
         ArrayList<Product> products = getProducts();
         if (products.size() == 0) {
+            adapter = new ListAdapter(new ArrayList<>());
             warning.setVisibility(View.VISIBLE);
             hint.setVisibility(View.VISIBLE);
         } else {
-            ListAdapter adapter = new ListAdapter(products);
+            adapter = new ListAdapter(products);
             recycler.setAdapter(adapter);
         }
 
@@ -57,7 +63,11 @@ public class RootActivity extends AppCompatActivity {
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+                if (manager.getItemCount() > 0) {
+                    startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+                } else {
+                    Snackbar.make(scan, "Ваш список товаров пуст!", BaseTransientBottomBar.LENGTH_SHORT).show();
+                }
             }
         });
         add.setOnClickListener(onClickListener);
@@ -73,8 +83,7 @@ public class RootActivity extends AppCompatActivity {
             );
             warning.setVisibility(View.INVISIBLE);
             hint.setVisibility(View.INVISIBLE);
-            ListAdapter adapter = new ListAdapter(list);
-            recycler.swapAdapter(adapter, true);
+            adapter.setProducts(getProducts());
         } else {
             warning.setVisibility(View.VISIBLE);
             hint.setVisibility(View.VISIBLE);

@@ -13,6 +13,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -55,6 +57,7 @@ public class ScanActivity extends AppCompatActivity {
     private MaterialButton recognize, cancel;
     private TextView message;
     private ProgressBar progressBar;
+    private MaterialToolbar toolbar;
     private static DBManager manager;
 
     @Override
@@ -66,6 +69,7 @@ public class ScanActivity extends AppCompatActivity {
         cancel = findViewById(R.id.cancel);
         message = findViewById(R.id.textViewMessage);
         progressBar = findViewById(R.id.progressBar);
+        toolbar = findViewById(R.id.topAppBar);
 
         manager = DBManager.getInstance(this);
 
@@ -79,7 +83,9 @@ public class ScanActivity extends AppCompatActivity {
                     @Override
                     public void onActivityResult(ActivityResult result) {
                         if (result.getResultCode() == Activity.RESULT_OK) {
+                            Log.d("SIGN", "work");
                             preview.setImageURI(path);
+                            deleteFile(path);
                         } else {
                             onBackPressed();
                         }
@@ -110,28 +116,45 @@ public class ScanActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<RecResult> call, Response<RecResult> response) {
                         if (response.isSuccessful()) {
-                            deleteFile(path);
                             RecResult result = response.body();
-                            try {
-                                handleResponse(result);
-                                onBackPressed();
-                            } catch (Exception e) {
-                                // Перефоткать
-                                Log.d("SIGN", "bad photo!");
-                                if (result.naming.length > 0) {
-                                    Log.d("SIGN", result.naming[0]);
-                                } else {
-                                    Log.d("SIGN", "size - 0");
+                            if (result.naming.length == 0) {
+                                Snackbar.make(recognize, "Фотография плохого качества!", BaseTransientBottomBar.LENGTH_INDEFINITE)
+                                        .setAction("Перефотографировать", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                onBackPressed();
+                                                startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+                                            }
+                                        }).setActionTextColor(Color.parseColor("#3eb489")).show();
+                            } else {
+                                try {
+                                    handleResponse(result);
+                                    onBackPressed();
+                                } catch (Exception e) {
+                                    Snackbar.make(recognize, "Товар не найден в списке!", BaseTransientBottomBar.LENGTH_LONG)
+                                            .setAction("Открыть камеру", new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+                                                    onBackPressed();
+                                                    startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+                                                }
+                                            }).setActionTextColor(Color.parseColor("#3eb489")).show();
+                                    Log.d("SIGN", "bad photo!");
+                                    if (result.naming.length > 0) {
+                                        Log.d("SIGN", result.naming[0]);
+                                    } else {
+                                        Log.d("SIGN", "size - 0");
+                                    }
                                 }
                             }
                         } else {
                             Log.d("SIGN", response.message());
                             Snackbar.make(recognize, "Не удалось соединиться с сервером! Попробуйте ещё раз!", BaseTransientBottomBar.LENGTH_SHORT)
                                     .show();
-                            preview.setVisibility(View.VISIBLE);
-                            message.setVisibility(View.INVISIBLE);
-                            progressBar.setVisibility(View.INVISIBLE);
                         }
+                        preview.setVisibility(View.VISIBLE);
+                        message.setVisibility(View.INVISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
 
                     @Override
@@ -143,6 +166,20 @@ public class ScanActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
             }
         });
     }

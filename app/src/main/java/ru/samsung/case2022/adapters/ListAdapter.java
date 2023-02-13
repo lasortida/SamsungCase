@@ -2,13 +2,17 @@ package ru.samsung.case2022.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.util.ArrayList;
 
@@ -23,6 +27,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
     public ListAdapter(ArrayList<Product> products) {
         this.products = products;
+    }
+
+    public void setProducts(ArrayList<Product> products) {
+        this.products = products;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -50,11 +59,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
         private TextView productName;
         private View card;
+        private int time = 0;
+        private CircularProgressIndicator indicator;
 
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
             card = itemView.findViewById(R.id.card);
             productName = itemView.findViewById(R.id.productName);
+            indicator = itemView.findViewById(R.id.indicator);
         }
 
         public void bind(Product product) {
@@ -63,6 +75,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                 @Override
                 public void onClick(View view) {
                     context.startActivity(new Intent(context, EditActivity.class).putExtra("PRODUCT", product));
+                }
+            });
+            card.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+
+                    return true;
                 }
             });
         }

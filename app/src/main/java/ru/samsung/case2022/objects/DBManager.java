@@ -116,4 +116,7 @@ public class DBManager {
         return probability;
     }
 
+    public int getItemCount() {
+        return getAllList().size();
+    }
 }
