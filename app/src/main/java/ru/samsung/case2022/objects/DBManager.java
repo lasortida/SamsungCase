@@ -72,6 +72,9 @@ public class DBManager {
         ArrayList<Product> products = getAllList();
         String[] predict = result.naming;
         ArrayList<String> predictList = new ArrayList<>(Arrays.asList(predict));
+        String[] numbers = result.numbers;
+        ArrayList<String> numbersList = new ArrayList<>(Arrays.asList(numbers));
+        predictList.addAll(numbersList);
         float[] probability = new float[products.size()];
         for (int i = 0; i < products.size(); ++i) {
             String productName = products.get(i).getName();
@@ -86,7 +89,7 @@ public class DBManager {
                 index = i;
             }
         }
-        if (max_prob >= 0.5) {
+        if (max_prob >= 0.45) {
             return index;
         } else {
             throw new Exception("element not found");
@@ -107,7 +110,7 @@ public class DBManager {
         }
         if (tables.length == 1) {
             if (probability >= 0.4) {
-                probability = 1;
+                probability = 0.499f;
             } else {
                 probability = 0;
             }

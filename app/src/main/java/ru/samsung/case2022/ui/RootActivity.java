@@ -49,6 +49,7 @@ public class RootActivity extends AppCompatActivity {
             adapter = new ListAdapter(new ArrayList<>());
             warning.setVisibility(View.VISIBLE);
             hint.setVisibility(View.VISIBLE);
+            recycler.setAdapter(adapter);
         } else {
             adapter = new ListAdapter(products);
             recycler.setAdapter(adapter);
