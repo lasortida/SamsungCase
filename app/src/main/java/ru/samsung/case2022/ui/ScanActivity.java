@@ -106,6 +106,11 @@ public class ScanActivity extends AppCompatActivity {
         recognize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                try{
+                    Thread.sleep(3000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 preview.setVisibility(View.INVISIBLE);
                 message.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.VISIBLE);

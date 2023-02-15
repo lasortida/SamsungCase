@@ -32,7 +32,7 @@ public class EditActivity extends AppCompatActivity {
 
         scan = findViewById(R.id.scan);
         toolbar = findViewById(R.id.topAppBar);
-        save = findViewById(R.id.buttonSave);
+        save = findViewById(R.id.save);
         editText = findViewById(R.id.editProductName);
         remove = findViewById(R.id.remove);
         manager = DBManager.getInstance(this);

@@ -29,7 +29,7 @@ public class AddProductActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_product);
         scan = findViewById(R.id.scan);
         toolbar = findViewById(R.id.topAppBar);
-        save = findViewById(R.id.buttonSave);
+        save = findViewById(R.id.save);
         editText = findViewById(R.id.editProductName);
         manager = DBManager.getInstance(this);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {

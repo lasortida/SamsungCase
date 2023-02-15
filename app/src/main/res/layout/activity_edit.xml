@@ -75,7 +75,6 @@
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
-            android:id="@+id/save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="@+id/materialCardView"
@@ -94,7 +93,7 @@
                 app:strokeColor="@color/gray" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonSave"
+                android:id="@+id/save"
                 style="?attr/materialIconButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
