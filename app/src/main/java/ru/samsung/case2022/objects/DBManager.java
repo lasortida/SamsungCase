@@ -68,32 +68,43 @@ public class DBManager {
         deleteProduct(product);
     }
 
-    public int contains(RecResult result) throws Exception {
+    public Product contains(RecResult result) throws Exception {
         ArrayList<Product> products = getAllList();
         String[] predict = result.naming;
         ArrayList<String> predictList = new ArrayList<>(Arrays.asList(predict));
         String[] numbers = result.numbers;
         ArrayList<String> numbersList = new ArrayList<>(Arrays.asList(numbers));
         predictList.addAll(numbersList);
-        float[] probability = new float[products.size()];
+        int maxCount = 0;
+        ArrayList<Product> productList = new ArrayList<>();
         for (int i = 0; i < products.size(); ++i) {
             String productName = products.get(i).getName();
-            String[] tables = productName.split(" ");
-            probability[i] = getProbability(tables, predictList);
-        }
-        float max_prob = -1;
-        int index = -1;
-        for (int i = 0; i < probability.length; ++i) {
-            if (probability[i] > max_prob) {
-                max_prob = probability[i];
-                index = i;
+            int count = getCountWords(productName, predictList);
+            if (count > maxCount) {
+                maxCount = count;
+                productList.clear();
+                productList.add(products.get(i));
+            }
+            if (count == maxCount) {
+                productList.add(products.get(i));
             }
         }
-        if (max_prob >= 0.45) {
-            return index;
+        if (maxCount > 0) {
+            return productList.get(0);
         } else {
             throw new Exception("element not found");
         }
+    }
+
+    private int getCountWords(String productName, ArrayList<String> predicted) {
+        int result = 0;
+        String[] words = productName.toLowerCase(Locale.ROOT).replace('ё', 'е').split(" ");
+        for (int i = 0; i < words.length; ++i) {
+            if (predicted.contains(words[i])) {
+                result += 1;
+            }
+        }
+        return result;
     }
 
     private float getProbability(String[] tables, ArrayList<String> predict) {

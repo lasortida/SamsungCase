@@ -46,7 +46,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
-                android:id="@+id/editProductName"
+                android:id="@+id/cardView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
@@ -60,22 +60,15 @@
                     android:text="Введите наименование товара:"
                     android:textSize="15sp" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textField"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editProductName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:fontFamily="@font/material"
+                    android:layout_margin="10dp"
                     android:hint="Название"
-                    app:endIconMode="clear_text">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/material" />
-
-                </com.google.android.material.textfield.TextInputLayout>
+                    android:textSize="15sp"
+                    android:layout_weight="1"/>
 
             </LinearLayout>
 

@@ -30,7 +30,7 @@ public class AddProductActivity extends AppCompatActivity {
         scan = findViewById(R.id.scan);
         toolbar = findViewById(R.id.topAppBar);
         save = findViewById(R.id.buttonSave);
-        editText = findViewById(R.id.editText);
+        editText = findViewById(R.id.editProductName);
         manager = DBManager.getInstance(this);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

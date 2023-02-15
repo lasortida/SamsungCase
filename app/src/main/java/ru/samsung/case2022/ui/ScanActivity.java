@@ -48,6 +48,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Multipart;
 import ru.samsung.case2022.R;
 import ru.samsung.case2022.objects.DBManager;
+import ru.samsung.case2022.objects.Product;
 import ru.samsung.case2022.objects.RecResult;
 
 public class ScanActivity extends AppCompatActivity {
@@ -204,11 +205,11 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     private Uri createImage() {
-        Uri uri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        Uri uri = MediaStore.Files.getContentUri("external");
         String imgName = "recognition.jpg";
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DISPLAY_NAME, imgName);
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/" + "Checklist/");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Download/" + "Checklist/");
         ContentResolver resolver = getContentResolver();
         Uri finalUri = resolver.insert(uri, values);
         return finalUri;
@@ -220,7 +221,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     public void handleResponse(RecResult result) throws Exception {
-        int index = manager.contains(result);
-        manager.deleteProduct(index);
+        Product product = manager.contains(result);
+        manager.deleteProduct(product);
     }
 }

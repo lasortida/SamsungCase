@@ -80,15 +80,13 @@ public class RootActivity extends AppCompatActivity {
         super.onResume();
         ArrayList<Product> list = getProducts();
         if (list.size() != 0) {
-            recycler.setVisibility(View.VISIBLE
-            );
             warning.setVisibility(View.INVISIBLE);
             hint.setVisibility(View.INVISIBLE);
             adapter.setProducts(getProducts());
         } else {
+            adapter.setProducts(list);
             warning.setVisibility(View.VISIBLE);
             hint.setVisibility(View.VISIBLE);
-            recycler.setVisibility(View.INVISIBLE);
         }
     }
 
