@@ -16,60 +16,78 @@ public class DBManager {
     private SQLiteDatabase db;
     private static DBManager dbManager;
 
-    public static DBManager getInstance(Context context) {
+    public static DBManager getInstance(Context context, String tableName) {
         if (dbManager == null) {
-            dbManager = new DBManager(context);
+            dbManager = new DBManager(context, tableName);
         }
         return dbManager;
     }
 
-    private DBManager(Context context) {
+    public void dropDatabase(String tableName) {
+        tableName = tableName.replace(' ', '_');
+        db.execSQL("DROP TABLE " + tableName + ";");
+    }
+
+    private DBManager(Context context, String tableName) {
+        tableName = tableName.replace(' ', '_');
         this.context = context;
         db = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
-        createTablesIfNeedBe();
+        createTablesIfNeedBe(tableName);
     }
 
-    public void addProduct(Product product) {
+    public void addProduct(Product product, String tableName) {
+        tableName = tableName.replace(' ', '_');
         ContentValues values = new ContentValues();
         values.put("NAME", product.getName());
-        db.insert("PRODUCTS", null, values);
+        values.put("COUNT", product.getCount());
+        Log.d("SIGN", "saved " + tableName);
+        db.insert(tableName, null, values);
     }
 
-    public ArrayList<Product> getAllList() {
+    public ArrayList<Product> getAllList(String tableName) {
+        tableName = tableName.replace(' ', '_');
         ArrayList<Product> list = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT * FROM PRODUCTS;", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + tableName + ";", null);
         boolean hasMoreData = cursor.moveToFirst();
         while (hasMoreData) {
             String name = cursor.getString(0);
-            list.add(new Product(name));
+            Product product = new Product(name);
+            product.setCount(cursor.getInt(1));
+            list.add(product);
             hasMoreData = cursor.moveToNext();
         }
         return list;
     }
 
-    private void createTablesIfNeedBe() {
-        db.execSQL("CREATE TABLE IF NOT EXISTS PRODUCTS (NAME TEXT, COST FLOAT);");
+    private void createTablesIfNeedBe(String tableName) {
+        tableName = tableName.replace(' ', '_');
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + tableName + "(NAME TEXT UNIQUE, COUNT INTEGER);");
     }
 
-    public void replaceProduct(Product oldProduct, String newName) {
+    public void replaceProduct(Product oldProduct, Product newProduct, String tableName) {
+        tableName = tableName.replace(' ', '_');
         String oldName = oldProduct.getName();
         ContentValues values = new ContentValues();
-        values.put("NAME", newName);
-        db.update("PRODUCTS", values, "NAME = ?", new String[]{oldName});
+        values.put("NAME", newProduct.getName());
+        values.put("COUNT", newProduct.getCount());
+        db.update(tableName, values, "NAME = ?", new String[]{oldName});
     }
 
-    public void deleteProduct(Product product) {
+    public void deleteProduct(Product product, String tableName) {
+        tableName = tableName.replace(' ', '_');
         String name = product.getName();
-        db.delete("PRODUCTS", "NAME = ?", new String[]{name});
+        db.delete(tableName, "NAME = ?", new String[]{name});
     }
 
-    public void deleteProduct(int index) {
-        Product product = getAllList().get(index);
-        deleteProduct(product);
+    public void deleteProduct(int index, String tableName) {
+        tableName = tableName.replace(' ', '_');
+        Product product = getAllList(tableName).get(index);
+        deleteProduct(product, tableName);
     }
 
-    public Product contains(RecResult result) throws Exception {
-        ArrayList<Product> products = getAllList();
+    public Product contains(RecResult result, String tableName) throws Exception {
+        tableName = tableName.replace(' ', '_');
+        ArrayList<Product> products = getAllList(tableName);
         String[] predict = result.naming;
         ArrayList<String> predictList = new ArrayList<>(Arrays.asList(predict));
         String[] numbers = result.numbers;
@@ -130,7 +148,14 @@ public class DBManager {
         return probability;
     }
 
-    public int getItemCount() {
-        return getAllList().size();
+    public int getItemCount(String tableName) {
+        tableName = tableName.replace(' ', '_');
+        return getAllList(tableName).size();
+    }
+
+    public void renameTable(String oldName, String newName) {
+        newName = newName.replace(' ', '_');
+        oldName = oldName.replace(' ', '_');
+        db.execSQL("ALTER TABLE " + oldName + " RENAME TO " + newName + ";");
     }
 }

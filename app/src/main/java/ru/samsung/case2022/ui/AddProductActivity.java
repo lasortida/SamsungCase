@@ -1,9 +1,12 @@
 package ru.samsung.case2022.ui;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -20,18 +23,25 @@ public class AddProductActivity extends AppCompatActivity {
     private ActionMenuItemView scan;
     private MaterialToolbar toolbar;
     private MaterialButton save;
-    private TextInputEditText editText;
+    private TextInputEditText editText, editTextCount;
     private static DBManager manager;
+    private String tableName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
+
+        tableName = getIntent().getExtras().getString("LIST_NAME");
+        if (tableName.equals("non")) {
+            tableName = "Новый список";
+        }
+
         scan = findViewById(R.id.scan);
         toolbar = findViewById(R.id.topAppBar);
         save = findViewById(R.id.save);
         editText = findViewById(R.id.editProductName);
-        manager = DBManager.getInstance(this);
+        editTextCount = findViewById(R.id.editTextCount);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -41,26 +51,33 @@ public class AddProductActivity extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d("SIGN", "table: " + tableName);
+                manager = DBManager.getInstance(getApplicationContext(), tableName);
                 String text = editText.getText().toString();
+                int number = Integer.parseInt(editTextCount.getText().toString());
                 if (text.equals("") || text.equals(" ")) {
                     Snackbar.make(save, "Вы ввели пустое значение", Snackbar.LENGTH_SHORT)
                             .setAction("Сохранить", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    createProduct(text);
-                                    onBackPressed();
+                                    finishAndGetResult(text, number);
                                 }
                             }).show();
                 } else {
-                    createProduct(text);
-                    onBackPressed();
+                    finishAndGetResult(text, number);
                 }
             }
         });
     }
 
-    public void createProduct(String name) {
-        Product product = new Product(name);
-        manager.addProduct(product);
+    public void finishAndGetResult(String productName, int number) {
+        Product product = new Product(productName);
+        product.setCount(number);
+        manager.addProduct(product, tableName);
+        Intent intent = new Intent();
+        intent.putExtra("LIST_NAME", tableName);
+        intent.putExtra("PRODUCT", product);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

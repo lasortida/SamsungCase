@@ -3,6 +3,7 @@ package ru.samsung.case2022.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -20,7 +21,7 @@ public class EditActivity extends AppCompatActivity {
     private ActionMenuItemView scan, add;
     private MaterialToolbar toolbar;
     private MaterialButton save, remove;
-    private TextInputEditText editText;
+    private TextInputEditText editText, editTextCount;
     private static DBManager manager;
 
     @Override
@@ -29,13 +30,15 @@ public class EditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit);
 
         Product oldProduct = (Product) getIntent().getExtras().get("PRODUCT");
+        String tableName = getIntent().getExtras().getString("LIST_NAME");
 
         scan = findViewById(R.id.scan);
         toolbar = findViewById(R.id.topAppBar);
         save = findViewById(R.id.save);
         editText = findViewById(R.id.editProductName);
+        editTextCount = findViewById(R.id.editTextCount);
         remove = findViewById(R.id.remove);
-        manager = DBManager.getInstance(this);
+        manager = DBManager.getInstance(this, tableName);
 
         editText.setText(oldProduct.getName());
 
@@ -49,28 +52,43 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String newName = editText.getText().toString();
+                int number = Integer.parseInt(editTextCount.getText().toString());
                 if (newName.equals("") || newName.equals(" ")) {
                     Snackbar.make(save, "Вы ввели пустое значение", Snackbar.LENGTH_SHORT)
                             .setAction("Сохранить", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    manager.replaceProduct(oldProduct, newName);
-                                    onBackPressed();
+                                    Product newProduct = new Product(newName);
+                                    newProduct.setCount(number);
+                                    finishAndGetResult(oldProduct, newProduct, tableName);
                                 }
                             }).show();
                 } else {
-                    manager.replaceProduct(oldProduct, newName);
-                    onBackPressed();
+                    Product newProduct = new Product(newName);
+                    newProduct.setCount(number);
+                    finishAndGetResult(oldProduct, newProduct, tableName);
                 }
             }
         });
         remove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                manager.deleteProduct(oldProduct);
-                onBackPressed();
+                finishAndGetResult(oldProduct, null, tableName);
             }
         });
+    }
+
+    public void finishAndGetResult(Product oldProduct, Product newProduct, String tableName) {
+        Intent intent = new Intent();
+        intent.putExtra("OLD_PRODUCT", oldProduct);
+        intent.putExtra("NEW_PRODUCT", newProduct);
+        if (newProduct == null) {
+            manager.deleteProduct(oldProduct, tableName);
+        } else {
+            manager.replaceProduct(oldProduct, newProduct, tableName);
+        }
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
 }

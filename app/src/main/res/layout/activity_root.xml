@@ -24,46 +24,76 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler"
-        android:layout_marginTop="40dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-    </androidx.recyclerview.widget.RecyclerView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@id/recycler"
-        app:layout_anchorGravity="center"
-        android:orientation="vertical">
-
         <TextView
-            android:id="@+id/warning"
-            android:visibility="visible"
-            android:layout_width="match_parent"
+            android:id="@+id/listName"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Список товаров пуст!"
-            android:textAlignment="center"
-            android:fontFamily="@font/ubuntu_regular"
+            android:text="Новый список"
+            android:textColor="@color/dark_green"
+            android:fontFamily="@font/material"
             android:textSize="19sp"
-            android:textStyle="bold"/>
+            android:layout_marginTop="15dp"
+            android:layout_marginStart="10dp"
+            android:padding="10dp"
+            android:drawablePadding="5dp"
+            android:drawableEnd="@drawable/edit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:visibility="visible"
-            android:id="@+id/hint"
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/listName"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hint"
-            android:textAlignment="center"
-            android:textColor="@drawable/button_hint_color"
-            android:fontFamily="@font/ubuntu_regular"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:textSize="15sp"/>
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/recycler"
+            app:layout_constraintEnd_toEndOf="@+id/recycler"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/recycler">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/warning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/ubuntu_regular"
+                android:text="Список товаров пуст!"
+                android:textAlignment="center"
+                android:textSize="19sp"
+                android:textStyle="bold"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/ubuntu_regular"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/hint"
+                android:textAlignment="center"
+                android:textColor="@drawable/button_hint_color"
+                android:textSize="15sp"
+                android:visibility="invisible" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

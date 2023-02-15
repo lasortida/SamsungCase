@@ -1,21 +1,35 @@
 package ru.samsung.case2022.ui;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import retrofit2.Call;
+import retrofit2.Response;
 import ru.samsung.case2022.R;
 import ru.samsung.case2022.adapters.ListAdapter;
 import ru.samsung.case2022.objects.DBManager;
@@ -25,9 +39,12 @@ public class RootActivity extends AppCompatActivity {
 
     private RecyclerView recycler;
     private ActionMenuItemView scan, add;
-    private TextView warning, hint;
+    private TextView warning, hint, listName;
     private static DBManager manager;
     private ListAdapter adapter;
+    private String tableName;
+    private ArrayList<Product> fullList;
+    private Intent scanIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,60 +55,193 @@ public class RootActivity extends AppCompatActivity {
         add = findViewById(R.id.add);
         warning = findViewById(R.id.warning);
         hint = findViewById(R.id.hint);
-        manager = DBManager.getInstance(this);
+        listName = findViewById(R.id.listName);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recycler.setLayoutManager(layoutManager);
         recycler.setHasFixedSize(true);
 
-        ArrayList<Product> products = getProducts();
-        if (products.size() == 0) {
-            adapter = new ListAdapter(new ArrayList<>());
+        tableName = getTableName();
+
+        if (tableName == null) {
             warning.setVisibility(View.VISIBLE);
             hint.setVisibility(View.VISIBLE);
-            recycler.setAdapter(adapter);
+            fullList = new ArrayList<>();
+            listName.setVisibility(View.INVISIBLE);
         } else {
-            adapter = new ListAdapter(products);
-            recycler.setAdapter(adapter);
+            manager = DBManager.getInstance(this, tableName);
+            listName.setText(tableName);
+            fullList = getProducts();
         }
+
+        adapter = new ListAdapter(fullList);
+        recycler.setAdapter(adapter);
 
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), AddProductActivity.class));
+                Intent intent = new Intent(getApplicationContext(), AddProductActivity.class);
+                if (tableName == null) {
+                    intent.putExtra("LIST_NAME", "non");
+                } else {
+                    intent.putExtra("LIST_NAME", tableName);
+                }
+                addResultLauncher.launch(intent);
             }
         };
+
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (manager.getItemCount() > 0) {
-                    startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+                scanIntent = new Intent(getApplicationContext(), ScanActivity.class);
+                scanIntent.putExtra("LIST_NAME", tableName);
+                if (tableName != null) {
+                    scanResultLauncher.launch(scanIntent);
                 } else {
                     Snackbar.make(scan, "Ваш список товаров пуст!", BaseTransientBottomBar.LENGTH_SHORT).show();
                 }
             }
         });
+
         add.setOnClickListener(onClickListener);
         hint.setOnClickListener(onClickListener);
+
+        listName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                View view1 = LayoutInflater.from(RootActivity.this).inflate(R.layout.dialog_layout, null);
+                TextInputEditText editText = view1.findViewById(R.id.editListName);
+                AlertDialog dialog = new MaterialAlertDialogBuilder(RootActivity.this)
+                        .setTitle("Изменить название")
+                        .setView(view1)
+                        .setPositiveButton("Ок", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                String text = editText.getText().toString();
+                                if (!text.equals("")) {
+                                    manager.renameTable(tableName, text);
+                                    listName.setText(text);
+                                    tableName = renameList(text);
+                                }
+                                dialogInterface.dismiss();
+                            }
+                        }).show();
+            }
+        });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        ArrayList<Product> list = getProducts();
-        if (list.size() != 0) {
-            warning.setVisibility(View.INVISIBLE);
-            hint.setVisibility(View.INVISIBLE);
-            adapter.setProducts(getProducts());
-        } else {
-            adapter.setProducts(list);
-            warning.setVisibility(View.VISIBLE);
-            hint.setVisibility(View.VISIBLE);
-        }
+    ActivityResultLauncher<Intent> addResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        if (tableName == null) {
+                            warning.setVisibility(View.INVISIBLE);
+                            hint.setVisibility(View.INVISIBLE);
+                            listName.setVisibility(View.VISIBLE);
+                            manager = DBManager.getInstance(getApplicationContext(), tableName);
+                        }
+                        Intent intent = result.getData();
+                        Product product = (Product) intent.getExtras().get("PRODUCT");
+                        String tableNameCur = intent.getExtras().getString("LIST_NAME");
+                        fullList.add(product);
+                        adapter.notifyItemInserted(fullList.size() - 1);
+                        if (tableName == null || !tableName.equals(tableNameCur)) {
+                            tableName = renameList(tableNameCur);
+                            listName.setText(tableName);
+                        }
+                    }
+                }
+            }
+    );
+
+    ActivityResultLauncher<Intent> scanResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        boolean restart = result.getData().getExtras().getBoolean("RESTART");
+                        if (restart) {
+                            scanResultLauncher.launch(scanIntent);
+                        } else {
+                            Product buy = (Product) result.getData().getExtras().get("BUY_PRODUCT");
+                            int index = fullList.indexOf(buy);
+                            fullList.remove(index);
+                            adapter.notifyItemRemoved(index);
+                            adapter.notifyItemRangeRemoved(index, adapter.getItemCount());
+                            Snackbar.make(recycler, "Вычеркнуто: " + buy.getName(), BaseTransientBottomBar.LENGTH_LONG)
+                                    .show();
+                            if (fullList.size() == 0) {
+                                endOfList();
+                            }
+                        }
+                    }
+                }
+            }
+    );
+
+    public void endOfList() {
+        manager.dropDatabase(tableName);
+        listName.setVisibility(View.INVISIBLE);
+        tableName = renameList("");
+        tableName = null;
+        warning.setVisibility(View.VISIBLE);
+        warning.setText("Вы купили все товары!");
     }
+
+    public void startEditLauncher(Product product) {
+        Intent intent = new Intent(getApplicationContext(), EditActivity.class);
+        intent.putExtra("PRODUCT", product);
+        intent.putExtra("LIST_NAME", tableName);
+        editResultLauncher.launch(intent);
+    }
+
+    ActivityResultLauncher<Intent> editResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Log.d("SIGN", "yes");
+                        Intent intent = result.getData();
+                        Product oldProduct = (Product) intent.getExtras().get("OLD_PRODUCT");
+                        Product newProduct = (Product) intent.getExtras().get("NEW_PRODUCT");
+                        if (newProduct == null) {
+                            int index = fullList.indexOf(oldProduct);
+                            fullList.remove(index);
+                            adapter.notifyItemRemoved(index);
+                            adapter.notifyItemRangeRemoved(index, adapter.getItemCount());
+                        } else {
+                            int index = fullList.indexOf(oldProduct);
+                            fullList.remove(index);
+                            fullList.add(index, newProduct);
+                            adapter.notifyItemChanged(index);
+                        }
+                    }
+                }
+            }
+    );
 
     private ArrayList<Product> getProducts() {
-        ArrayList<Product> products = manager.getAllList();
+        ArrayList<Product> products = manager.getAllList(tableName);
         return products;
+    }
+
+    private String getTableName() {
+        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        String tableName = pref.getString("LIST_NAME", null);
+        if (tableName != null && tableName.equals("")) {
+            tableName = null;
+        }
+        return tableName;
+    }
+
+    private String renameList(String newName) {
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        editor.putString("LIST_NAME", newName);
+        editor.commit();
+        return newName;
     }
  }

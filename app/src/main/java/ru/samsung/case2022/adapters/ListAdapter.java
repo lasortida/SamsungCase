@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import ru.samsung.case2022.R;
 import ru.samsung.case2022.objects.Product;
 import ru.samsung.case2022.ui.EditActivity;
+import ru.samsung.case2022.ui.RootActivity;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
 
@@ -27,11 +28,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
     public ListAdapter(ArrayList<Product> products) {
         this.products = products;
-    }
-
-    public void setProducts(ArrayList<Product> products) {
-        this.products = products;
-        notifyDataSetChanged();
     }
 
     @NonNull
@@ -59,14 +55,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
         private TextView productName;
         private View card;
-        private int time = 0;
-        private CircularProgressIndicator indicator;
+        private TextView count;
 
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
             card = itemView.findViewById(R.id.card);
             productName = itemView.findViewById(R.id.productName);
-            indicator = itemView.findViewById(R.id.indicator);
+            count = itemView.findViewById(R.id.count);
         }
 
         public void bind(Product product) {
@@ -74,16 +69,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
             card.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    context.startActivity(new Intent(context, EditActivity.class).putExtra("PRODUCT", product));
+                    RootActivity activity = (RootActivity) context;
+                    activity.startEditLauncher(product);
                 }
             });
-            card.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-
-                    return true;
-                }
-            });
+            count.setText("x" + String.valueOf(product.getCount()));
         }
     }
 }

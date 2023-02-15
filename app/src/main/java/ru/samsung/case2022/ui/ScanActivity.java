@@ -60,6 +60,7 @@ public class ScanActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private MaterialToolbar toolbar;
     private static DBManager manager;
+    private String tableName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,9 @@ public class ScanActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         toolbar = findViewById(R.id.topAppBar);
 
-        manager = DBManager.getInstance(this);
+        tableName = getIntent().getExtras().getString("LIST_NAME");
+
+        manager = DBManager.getInstance(this, tableName);
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Uri path = createImage();
@@ -83,12 +86,14 @@ public class ScanActivity extends AppCompatActivity {
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if (result.getResultCode() == Activity.RESULT_OK) {
+                        if (result.getResultCode() == Activity.RESULT_OK && path != null) {
                             Log.d("SIGN", "work");
                             preview.setImageURI(path);
-                            deleteFile(path);
                         } else {
                             onBackPressed();
+                        }
+                        if (path != null) {
+                            deleteFile(path);
                         }
                     }
                 }
@@ -106,11 +111,6 @@ public class ScanActivity extends AppCompatActivity {
         recognize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try{
-                    Thread.sleep(3000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 preview.setVisibility(View.INVISIBLE);
                 message.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
@@ -128,21 +128,19 @@ public class ScanActivity extends AppCompatActivity {
                                         .setAction("Перефотографировать", new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
-                                                onBackPressed();
-                                                startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+                                                restart();
                                             }
                                         }).setActionTextColor(Color.parseColor("#3eb489")).show();
                             } else {
                                 try {
-                                    handleResponse(result);
-                                    onBackPressed();
+                                    Product buy = handleResponse(result);
+                                    getResult(buy);
                                 } catch (Exception e) {
                                     Snackbar.make(recognize, "Товар не найден в списке!", BaseTransientBottomBar.LENGTH_LONG)
                                             .setAction("Открыть камеру", new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View view) {
-                                                    onBackPressed();
-                                                    startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+                                                    restart();
                                                 }
                                             }).setActionTextColor(Color.parseColor("#3eb489")).show();
                                     Log.d("SIGN", "bad photo!");
@@ -210,13 +208,18 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     private Uri createImage() {
-        Uri uri = MediaStore.Files.getContentUri("external");
-        String imgName = "recognition.jpg";
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.DISPLAY_NAME, imgName);
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Download/" + "Checklist/");
-        ContentResolver resolver = getContentResolver();
-        Uri finalUri = resolver.insert(uri, values);
+        Uri finalUri = null;
+        try {
+            Uri uri = MediaStore.Files.getContentUri("external");
+            String imgName = "recognition.jpg";
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, imgName);
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, "Documents/" + "Checklist/");
+            ContentResolver resolver = getContentResolver();
+            finalUri = resolver.insert(uri, values);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return finalUri;
     }
 
@@ -225,8 +228,25 @@ public class ScanActivity extends AppCompatActivity {
         resolver.delete(uri, null, null);
     }
 
-    public void handleResponse(RecResult result) throws Exception {
-        Product product = manager.contains(result);
-        manager.deleteProduct(product);
+    public Product handleResponse(RecResult result) throws Exception {
+        Log.d("SIGN", "find " + tableName);
+        Product product = manager.contains(result, tableName);
+        manager.deleteProduct(product, tableName);
+        return product;
+    }
+
+    public void restart() {
+        Intent intent = new Intent();
+        intent.putExtra("RESTART", true);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    public void getResult(Product buy) {
+        Intent intent = new Intent();
+        intent.putExtra("RESTART", false);
+        intent.putExtra("BUY_PRODUCT", buy);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

@@ -7,6 +7,7 @@ public class Product implements Serializable {
 
     private String name;
     private float cost;
+    private int count;
 
     public Product(String name, float cost) {
         this.name = name;
@@ -19,6 +20,14 @@ public class Product implements Serializable {
 
     public Product() {
 
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public String getName() {
