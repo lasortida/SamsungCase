@@ -1,5 +1,7 @@
 package ru.samsung.case2022.ui;
 
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -18,6 +20,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +39,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -61,6 +67,7 @@ public class ScanActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private static DBManager manager;
     private String tableName;
+    private String tempFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +141,15 @@ public class ScanActivity extends AppCompatActivity {
                             } else {
                                 try {
                                     Product buy = handleResponse(result);
+                                    if (result.cost.length > 0) {
+                                        String cost = result.cost[0].replace('б', '6');
+                                        String rubles = cost.substring(0, cost.indexOf('р'));
+                                        String copes = cost.substring(cost.indexOf('р') + 1, cost.length() - 1);
+                                        int rub = Integer.parseInt(rubles);
+                                        int cop = Integer.parseInt(copes);
+                                        float cost_r = rub + (cop / 100);
+                                        buy.setCost(cost_r);
+                                    }
                                     getResult(buy);
                                 } catch (Exception e) {
                                     Snackbar.make(recognize, "Товар не найден в списке!", BaseTransientBottomBar.LENGTH_LONG)
@@ -208,18 +224,27 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     private Uri createImage() {
-        Uri finalUri = null;
-        try {
-            Uri uri = MediaStore.Files.getContentUri("external");
-            String imgName = "recognition.jpg";
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.Media.DISPLAY_NAME, imgName);
-            values.put(MediaStore.Images.Media.RELATIVE_PATH, "Documents/" + "Checklist/");
-            ContentResolver resolver = getContentResolver();
-            finalUri = resolver.insert(uri, values);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        Uri finalUri = null;
+//        try {
+//            Uri uri = MediaStore.Files.getContentUri("external");
+//            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
+//            String imgName = "recognition_" + timeStamp + ".jpg";
+//            ContentValues values = new ContentValues();
+//            values.put(MediaStore.Images.Media.DISPLAY_NAME, imgName);
+//            values.put(MediaStore.Images.Media.RELATIVE_PATH, "Documents/" + "Checklist/");
+//            ContentResolver resolver = getContentResolver();
+//            finalUri = resolver.insert(uri, values);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        Uri uri = MediaStore.Files.getContentUri("external");
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
+        String imgName = "recognition_" + timeStamp + ".jpg";
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, imgName);
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Documents/" + "Checklist/");
+        ContentResolver resolver = getContentResolver();
+        Uri finalUri = resolver.insert(uri, values);
         return finalUri;
     }
 

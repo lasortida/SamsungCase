@@ -17,11 +17,10 @@ public class DBManager {
     private static DBManager dbManager;
 
     public static DBManager getInstance(Context context, String tableName) {
-        if (dbManager == null) {
-            dbManager = new DBManager(context, tableName);
-        }
+        dbManager = new DBManager(context, tableName);
         return dbManager;
     }
+
 
     public void dropDatabase(String tableName) {
         tableName = tableName.replace(' ', '_');

@@ -48,4 +48,12 @@ public class Product implements Serializable {
         }
         return false;
     }
+
+    public float getCost() {
+        return cost;
+    }
+
+    public void setCost(float cost) {
+        this.cost = cost;
+    }
 }

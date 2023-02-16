@@ -54,7 +54,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/listName"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toTopOf="@id/textViewCost">
 
         </androidx.recyclerview.widget.RecyclerView>
 
@@ -93,6 +93,20 @@
                 android:visibility="invisible" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/textViewCost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/gray_text"
+            android:fontFamily="@font/material"
+            android:padding="10dp"
+            android:textAlignment="center"
+            android:text="Общая стоимость: "
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

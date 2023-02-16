@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -22,8 +23,9 @@ public class AddProductActivity extends AppCompatActivity {
 
     private ActionMenuItemView scan;
     private MaterialToolbar toolbar;
-    private MaterialButton save;
-    private TextInputEditText editText, editTextCount;
+    private MaterialButton save, remove;
+    private TextInputEditText editTextCount;
+    private EditText editText;
     private static DBManager manager;
     private String tableName;
 
@@ -66,6 +68,12 @@ public class AddProductActivity extends AppCompatActivity {
                 } else {
                     finishAndGetResult(text, number);
                 }
+            }
+        });
+        remove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
             }
         });
     }

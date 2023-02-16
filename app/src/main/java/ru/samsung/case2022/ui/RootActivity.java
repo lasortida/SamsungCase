@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,12 +40,13 @@ public class RootActivity extends AppCompatActivity {
 
     private RecyclerView recycler;
     private ActionMenuItemView scan, add;
-    private TextView warning, hint, listName;
+    private TextView warning, hint, listName, billing;
     private static DBManager manager;
     private ListAdapter adapter;
     private String tableName;
     private ArrayList<Product> fullList;
     private Intent scanIntent;
+    private float sum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,7 @@ public class RootActivity extends AppCompatActivity {
         warning = findViewById(R.id.warning);
         hint = findViewById(R.id.hint);
         listName = findViewById(R.id.listName);
+        billing = findViewById(R.id.textViewCost);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recycler.setLayoutManager(layoutManager);
@@ -68,10 +71,15 @@ public class RootActivity extends AppCompatActivity {
             hint.setVisibility(View.VISIBLE);
             fullList = new ArrayList<>();
             listName.setVisibility(View.INVISIBLE);
+            billing.setVisibility(View.INVISIBLE);
         } else {
             manager = DBManager.getInstance(this, tableName);
             listName.setText(tableName);
             fullList = getProducts();
+            sum = getSum();
+            if (sum > 0) {
+                billing.setText("Общая стоимость: " + sum);
+            }
         }
 
         adapter = new ListAdapter(fullList);
@@ -140,7 +148,6 @@ public class RootActivity extends AppCompatActivity {
                             warning.setVisibility(View.INVISIBLE);
                             hint.setVisibility(View.INVISIBLE);
                             listName.setVisibility(View.VISIBLE);
-                            manager = DBManager.getInstance(getApplicationContext(), tableName);
                         }
                         Intent intent = result.getData();
                         Product product = (Product) intent.getExtras().get("PRODUCT");
@@ -150,6 +157,7 @@ public class RootActivity extends AppCompatActivity {
                         if (tableName == null || !tableName.equals(tableNameCur)) {
                             tableName = renameList(tableNameCur);
                             listName.setText(tableName);
+                            manager = DBManager.getInstance(getApplicationContext(), tableName);
                         }
                     }
                 }
@@ -173,6 +181,34 @@ public class RootActivity extends AppCompatActivity {
                             adapter.notifyItemRangeRemoved(index, adapter.getItemCount());
                             Snackbar.make(recycler, "Вычеркнуто: " + buy.getName(), BaseTransientBottomBar.LENGTH_LONG)
                                     .show();
+                            if (buy.getCost() > 0) {
+                                sum += buy.getCost() * buy.getCount();
+                            } else {
+                                Snackbar.make(recycler, "Цена не обнаружена", BaseTransientBottomBar.LENGTH_LONG)
+                                        .setAction("Изменить", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                View view1 = LayoutInflater.from(RootActivity.this).inflate(R.layout.cost_dialog_layout, null);
+                                                TextInputEditText editText = view1.findViewById(R.id.editCost);
+                                                AlertDialog dialog = new MaterialAlertDialogBuilder(RootActivity.this)
+                                                        .setTitle("Введите цену товара")
+                                                        .setView(view1)
+                                                        .setPositiveButton("Ок", new DialogInterface.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                                float cost = Float.parseFloat(editText.getText().toString());
+                                                                sum += cost * buy.getCount();
+                                                                dialogInterface.dismiss();
+                                                            }
+                                                        }).show();
+                                            }
+                                        }).setActionTextColor(Color.parseColor("#3eb489")).show();
+                            }
+                            sum = changeSum(sum);
+                            if (sum > 0) {
+                                billing.setText("Общая стоимость: " + String.valueOf(sum));
+                                billing.setVisibility(View.VISIBLE);
+                            }
                             if (fullList.size() == 0) {
                                 endOfList();
                             }
@@ -189,6 +225,11 @@ public class RootActivity extends AppCompatActivity {
         tableName = null;
         warning.setVisibility(View.VISIBLE);
         warning.setText("Вы купили все товары!");
+        hint.setText("Общая стоимость: " + sum);
+        hint.setClickable(false);
+        hint.setVisibility(View.VISIBLE);
+        billing.setVisibility(View.INVISIBLE);
+        sum = 0;
     }
 
     public void startEditLauncher(Product product) {
@@ -213,6 +254,18 @@ public class RootActivity extends AppCompatActivity {
                             fullList.remove(index);
                             adapter.notifyItemRemoved(index);
                             adapter.notifyItemRangeRemoved(index, adapter.getItemCount());
+                            if (fullList.size() == 0) {
+                                tableName = renameList("");
+                                tableName = null;
+                                listName.setVisibility(View.INVISIBLE);
+                                warning.setText("Список товаров пуст!");
+                                warning.setVisibility(View.VISIBLE);
+                                hint.setClickable(true);
+                                hint.setText(R.string.hint);
+                                hint.setVisibility(View.VISIBLE);
+                                billing.setVisibility(View.INVISIBLE);
+                                sum = 0;
+                            }
                         } else {
                             int index = fullList.indexOf(oldProduct);
                             fullList.remove(index);
@@ -243,5 +296,18 @@ public class RootActivity extends AppCompatActivity {
         editor.putString("LIST_NAME", newName);
         editor.commit();
         return newName;
+    }
+
+    private float getSum() {
+        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        float sum = pref.getFloat("SUM", 0);
+        return sum;
+    }
+
+    private float changeSum(float sum) {
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        editor.putFloat("SUM", sum);
+        editor.commit();
+        return sum;
     }
  }
