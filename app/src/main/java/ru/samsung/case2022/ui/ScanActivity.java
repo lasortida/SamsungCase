@@ -131,13 +131,7 @@ public class ScanActivity extends AppCompatActivity {
                         if (response.isSuccessful()) {
                             RecResult result = response.body();
                             if (result.naming.length == 0) {
-                                Snackbar.make(recognize, "Фотография плохого качества!", BaseTransientBottomBar.LENGTH_INDEFINITE)
-                                        .setAction("Перефотографировать", new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                restart();
-                                            }
-                                        }).setActionTextColor(Color.parseColor("#3eb489")).show();
+                                finish();
                             } else {
                                 try {
                                     Product buy = handleResponse(result);
@@ -152,25 +146,11 @@ public class ScanActivity extends AppCompatActivity {
                                     }
                                     getResult(buy);
                                 } catch (Exception e) {
-                                    Snackbar.make(recognize, "Товар не найден в списке!", BaseTransientBottomBar.LENGTH_LONG)
-                                            .setAction("Открыть камеру", new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View view) {
-                                                    restart();
-                                                }
-                                            }).setActionTextColor(Color.parseColor("#3eb489")).show();
-                                    Log.d("SIGN", "bad photo!");
-                                    if (result.naming.length > 0) {
-                                        Log.d("SIGN", result.naming[0]);
-                                    } else {
-                                        Log.d("SIGN", "size - 0");
-                                    }
+                                    finish();
                                 }
                             }
                         } else {
-                            Log.d("SIGN", response.message());
-                            Snackbar.make(recognize, "Не удалось соединиться с сервером! Попробуйте ещё раз!", BaseTransientBottomBar.LENGTH_SHORT)
-                                    .show();
+                            finish();
                         }
                         preview.setVisibility(View.VISIBLE);
                         message.setVisibility(View.INVISIBLE);
@@ -179,11 +159,12 @@ public class ScanActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<RecResult> call, Throwable t) {
-                        Snackbar.make(recognize, "Не удалось соединиться с сервером! Попробуйте ещё раз!", BaseTransientBottomBar.LENGTH_SHORT)
+                        Snackbar.make(recognize, R.string.warning_server, BaseTransientBottomBar.LENGTH_SHORT)
                                 .show();
                         preview.setVisibility(View.VISIBLE);
                         message.setVisibility(View.INVISIBLE);
                         progressBar.setVisibility(View.INVISIBLE);
+                        finish();
                     }
                 });
             }
@@ -192,14 +173,14 @@ public class ScanActivity extends AppCompatActivity {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackPressed();
+                finish();
             }
         });
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackPressed();
+                finish();
             }
         });
     }
@@ -224,19 +205,6 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     private Uri createImage() {
-//        Uri finalUri = null;
-//        try {
-//            Uri uri = MediaStore.Files.getContentUri("external");
-//            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
-//            String imgName = "recognition_" + timeStamp + ".jpg";
-//            ContentValues values = new ContentValues();
-//            values.put(MediaStore.Images.Media.DISPLAY_NAME, imgName);
-//            values.put(MediaStore.Images.Media.RELATIVE_PATH, "Documents/" + "Checklist/");
-//            ContentResolver resolver = getContentResolver();
-//            finalUri = resolver.insert(uri, values);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         Uri uri = MediaStore.Files.getContentUri("external");
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
         String imgName = "recognition_" + timeStamp + ".jpg";

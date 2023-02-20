@@ -106,7 +106,7 @@ public class RootActivity extends AppCompatActivity {
                 if (tableName != null) {
                     scanResultLauncher.launch(scanIntent);
                 } else {
-                    Snackbar.make(scan, "Ваш список товаров пуст!", BaseTransientBottomBar.LENGTH_SHORT).show();
+                    Snackbar.make(scan, R.string.warning_list_null, BaseTransientBottomBar.LENGTH_SHORT).show();
                 }
             }
         });
@@ -120,7 +120,7 @@ public class RootActivity extends AppCompatActivity {
                 View view1 = LayoutInflater.from(RootActivity.this).inflate(R.layout.dialog_layout, null);
                 TextInputEditText editText = view1.findViewById(R.id.editListName);
                 AlertDialog dialog = new MaterialAlertDialogBuilder(RootActivity.this)
-                        .setTitle("Изменить название")
+                        .setTitle(R.string.change_name)
                         .setView(view1)
                         .setPositiveButton("Ок", new DialogInterface.OnClickListener() {
                             @Override
@@ -184,14 +184,14 @@ public class RootActivity extends AppCompatActivity {
                             if (buy.getCost() > 0) {
                                 sum += buy.getCost() * buy.getCount();
                             } else {
-                                Snackbar.make(recycler, "Цена не обнаружена", BaseTransientBottomBar.LENGTH_LONG)
-                                        .setAction("Изменить", new View.OnClickListener() {
+                                Snackbar.make(recycler, R.string.price_null, BaseTransientBottomBar.LENGTH_LONG)
+                                        .setAction(R.string.change, new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
                                                 View view1 = LayoutInflater.from(RootActivity.this).inflate(R.layout.cost_dialog_layout, null);
                                                 TextInputEditText editText = view1.findViewById(R.id.editCost);
                                                 AlertDialog dialog = new MaterialAlertDialogBuilder(RootActivity.this)
-                                                        .setTitle("Введите цену товара")
+                                                        .setTitle(R.string.enter_price)
                                                         .setView(view1)
                                                         .setPositiveButton("Ок", new DialogInterface.OnClickListener() {
                                                             @Override
@@ -224,7 +224,7 @@ public class RootActivity extends AppCompatActivity {
         tableName = renameList("");
         tableName = null;
         warning.setVisibility(View.VISIBLE);
-        warning.setText("Вы купили все товары!");
+        warning.setText(R.string.hint_done);
         hint.setText("Общая стоимость: " + sum);
         hint.setClickable(false);
         hint.setVisibility(View.VISIBLE);

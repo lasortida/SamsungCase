@@ -1,4 +1,31 @@
 <resources>
     <string name="app_name">SamsungCase</string>
     <string name="hint"><u>Скорее составьте список товаров!</u></string>
+    <string name="warning_server">Не удалось соединиться с сервером! Попробуйте ещё раз!</string>
+    <string name="warning_null">Вы ввели пустое значение</string>
+    <string name="save">Сохранить</string>
+    <string name="change_name">Изменить название</string>
+    <string name="warning_list_null">Ваш список товаров пуст!</string>
+    <string name="price_null">Цена не обнаружена</string>
+    <string name="change">Изменить</string>
+    <string name="enter_price">Введите цену товара</string>
+    <string name="hint_done">Вы купили все товары!</string>
+    <string name="new_product">Новый товар</string>
+    <string name="enter_name_product">Введите наименование товара:</string>
+    <string name="name">Название</string>
+    <string name="add">Добавить</string>
+    <string name="choose_count">Выберите кол-во</string>
+    <string name="_1">1</string>
+    <string name="edit">Редактирование</string>
+    <string name="remove">Удалить</string>
+    <string name="title">Чек-лист покупок</string>
+    <string name="new_list">Новый список</string>
+    <string name="cost">Общая стоимость:</string>
+    <string name="scan">Сканирование</string>
+    <string name="wait">Подождите, идёт распознование...</string>
+    <string name="cancel">Отменить</string>
+    <string name="recognize">Распознать</string>
+    <string name="cost_dialog">Цена</string>
+    <string name="sample">Наименование товара</string>
+    <string name="count_product_sample">x2</string>
 </resources>

@@ -42,6 +42,8 @@ public class EditActivity extends AppCompatActivity {
 
         editText.setText(oldProduct.getName());
 
+        editTextCount.setText(String.valueOf(oldProduct.getCount()));
+
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,8 +56,8 @@ public class EditActivity extends AppCompatActivity {
                 String newName = editText.getText().toString();
                 int number = Integer.parseInt(editTextCount.getText().toString());
                 if (newName.equals("") || newName.equals(" ")) {
-                    Snackbar.make(save, "Вы ввели пустое значение", Snackbar.LENGTH_SHORT)
-                            .setAction("Сохранить", new View.OnClickListener() {
+                    Snackbar.make(save, R.string.warning_null, Snackbar.LENGTH_SHORT)
+                            .setAction(R.string.save, new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     Product newProduct = new Product(newName);
