@@ -124,34 +124,6 @@ public class DBManager {
         return result;
     }
 
-    private float getProbability(String[] tables, ArrayList<String> predict) {
-        float probability = 0;
-        String word = tables[0].toLowerCase(Locale.ROOT).replace('ё', 'е');
-        if (predict.contains(word)) {
-            probability += 0.4;
-        }
-        for (int i = 1; i < tables.length; ++i) {
-            word = tables[i].toLowerCase(Locale.ROOT).replace('ё', 'е');
-            if (predict.contains(word)) {
-                probability += 0.1;
-            }
-        }
-        if (tables.length == 1) {
-            if (probability >= 0.4) {
-                probability = 0.499f;
-            } else {
-                probability = 0;
-            }
-        }
-        Log.d("SIGN", tables[0] + "Probability: " + String.valueOf(probability));
-        return probability;
-    }
-
-    public int getItemCount(String tableName) {
-        tableName = tableName.replace(' ', '_');
-        return getAllList(tableName).size();
-    }
-
     public void renameTable(String oldName, String newName) {
         newName = newName.replace(' ', '_');
         oldName = oldName.replace(' ', '_');

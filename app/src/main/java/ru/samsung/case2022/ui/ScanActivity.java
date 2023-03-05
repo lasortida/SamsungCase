@@ -109,7 +109,7 @@ public class ScanActivity extends AppCompatActivity {
         resultLauncher.launch(intent);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://81.200.145.45:8001/")
+                .baseUrl("http://87.249.44.16:8001/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
