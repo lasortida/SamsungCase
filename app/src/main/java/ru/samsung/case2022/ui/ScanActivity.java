@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.ActionMenuItemView;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -60,6 +61,7 @@ import ru.samsung.case2022.objects.RecResult;
 public class ScanActivity extends AppCompatActivity {
 
     private ImageView preview;
+    private ActionMenuItemView scan, add;
     private RecognitionService service;
     private MaterialButton recognize, cancel;
     private TextView message;
@@ -78,6 +80,8 @@ public class ScanActivity extends AppCompatActivity {
         message = findViewById(R.id.textViewMessage);
         progressBar = findViewById(R.id.progressBar);
         toolbar = findViewById(R.id.topAppBar);
+        scan = findViewById(R.id.scan);
+        add = findViewById(R.id.add);
 
         tableName = getIntent().getExtras().getString("LIST_NAME");
 
@@ -86,6 +90,10 @@ public class ScanActivity extends AppCompatActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Uri path = createImage();
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+
+        scan.setClickable(false);
+        add.setClickable(false);
+        add.setAlpha(0.2f);
 
         ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -140,7 +148,8 @@ public class ScanActivity extends AppCompatActivity {
                                         String copes = cost.substring(cost.indexOf('р') + 1, cost.length() - 1);
                                         int rub = Integer.parseInt(rubles);
                                         int cop = Integer.parseInt(copes);
-                                        float cost_r = rub + (cop / 100);
+                                        double cost_cop = (double) cop / 100d;
+                                        float cost_r = (float) cost_cop + rub;
                                         buy.setCost(cost_r);
                                     }
                                     getResult(buy);
@@ -240,7 +249,7 @@ public class ScanActivity extends AppCompatActivity {
     public void finishWithError(String message) {
         Intent intent = new Intent();
         intent.putExtra("MESSAGE", message);
-        setResult(RESULT_CANCELED, intent);
+        setResult(RESULT_FIRST_USER, intent);
         finish();
     }
 }

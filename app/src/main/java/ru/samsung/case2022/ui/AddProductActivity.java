@@ -21,7 +21,7 @@ import ru.samsung.case2022.objects.Product;
 
 public class AddProductActivity extends AppCompatActivity {
 
-    private ActionMenuItemView scan;
+    private ActionMenuItemView scan, add;
     private MaterialToolbar toolbar;
     private MaterialButton save;
     private TextInputEditText editTextCount;
@@ -40,6 +40,7 @@ public class AddProductActivity extends AppCompatActivity {
         }
 
         scan = findViewById(R.id.scan);
+        add = findViewById(R.id.add);
         toolbar = findViewById(R.id.topAppBar);
         save = findViewById(R.id.save);
         editText = findViewById(R.id.editProductName);
@@ -70,20 +71,25 @@ public class AddProductActivity extends AppCompatActivity {
                 }
             }
         });
+        scan.setClickable(false);
+        add.setClickable(false);
+        scan.setAlpha(0.2f);
     }
 
     public void finishAndGetResult(String productName, int number) {
         Product product = new Product(productName);
         product.setCount(number);
-        boolean add = manager.addProduct(product, tableName);
         Product oldProduct = manager.getProduct(product.getName(), tableName);
+        boolean add = manager.addProduct(product, tableName);
         Intent intent = new Intent();
         intent.putExtra("LIST_NAME", tableName);
-        intent.putExtra("PRODUCT", product);
         intent.putExtra("ADD", add);
         if (oldProduct != null) {
+            Log.d("SIGN", String.valueOf(oldProduct.getCount()) + " YES");
             intent.putExtra("OLD", oldProduct);
+            product.setCount(product.getCount() + oldProduct.getCount());
         }
+        intent.putExtra("PRODUCT", product);
         setResult(RESULT_OK, intent);
         finish();
     }

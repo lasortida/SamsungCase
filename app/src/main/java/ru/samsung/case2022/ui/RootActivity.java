@@ -191,27 +191,30 @@ public class RootActivity extends AppCompatActivity {
                             Snackbar.make(recycler, "Вычеркнуто: " + buy.getName(), BaseTransientBottomBar.LENGTH_LONG)
                                     .show();
                             if (buy.getCost() > 0) {
-                                sum += buy.getCost() * buy.getCount();
+                                sum += (double) Math.round(buy.getCost() * buy.getCount() * 100d) / 100d;
                             } else {
-                                Snackbar.make(recycler, R.string.price_null, BaseTransientBottomBar.LENGTH_LONG)
-                                        .setAction(R.string.change, new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                View view1 = LayoutInflater.from(RootActivity.this).inflate(R.layout.cost_dialog_layout, null);
-                                                TextInputEditText editText = view1.findViewById(R.id.editCost);
-                                                AlertDialog dialog = new MaterialAlertDialogBuilder(RootActivity.this)
-                                                        .setTitle(R.string.enter_price)
-                                                        .setView(view1)
-                                                        .setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-                                                            @Override
-                                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                                float cost = Float.parseFloat(editText.getText().toString());
-                                                                sum += cost * buy.getCount();
-                                                                dialogInterface.dismiss();
-                                                            }
-                                                        }).show();
-                                            }
-                                        }).setActionTextColor(Color.parseColor("#3eb489")).show();
+                                Snackbar bar = Snackbar.make(recycler, R.string.price_null, BaseTransientBottomBar.LENGTH_LONG);
+                                if (fullList.size() != 0) {
+                                    bar.setAction(R.string.change, new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            View view1 = LayoutInflater.from(RootActivity.this).inflate(R.layout.cost_dialog_layout, null);
+                                            TextInputEditText editText = view1.findViewById(R.id.editCost);
+                                            AlertDialog dialog = new MaterialAlertDialogBuilder(RootActivity.this)
+                                                    .setTitle(R.string.enter_price)
+                                                    .setView(view1)
+                                                    .setPositiveButton("Ок", new DialogInterface.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                                            float cost = Float.parseFloat(editText.getText().toString());
+                                                            sum += cost * buy.getCount();
+                                                            dialogInterface.dismiss();
+                                                        }
+                                                    }).show();
+                                        }
+                                    }).setActionTextColor(Color.parseColor("#3eb489"));
+                                }
+                                bar.show();
                             }
                             sum = changeSum(sum);
                             if (sum > 0) {
@@ -222,7 +225,7 @@ public class RootActivity extends AppCompatActivity {
                                 endOfList();
                             }
                         }
-                    } if (result.getResultCode() == Activity.RESULT_CANCELED) {
+                    } if (result.getResultCode() == Activity.RESULT_FIRST_USER) {
                         String message = (String) result.getData().getExtras().get("MESSAGE");
                         Snackbar.make(recycler, message, BaseTransientBottomBar.LENGTH_LONG).show();
                     }
