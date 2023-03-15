@@ -75,10 +75,15 @@ public class AddProductActivity extends AppCompatActivity {
     public void finishAndGetResult(String productName, int number) {
         Product product = new Product(productName);
         product.setCount(number);
-        manager.addProduct(product, tableName);
+        boolean add = manager.addProduct(product, tableName);
+        Product oldProduct = manager.getProduct(product.getName(), tableName);
         Intent intent = new Intent();
         intent.putExtra("LIST_NAME", tableName);
         intent.putExtra("PRODUCT", product);
+        intent.putExtra("ADD", add);
+        if (oldProduct != null) {
+            intent.putExtra("OLD", oldProduct);
+        }
         setResult(RESULT_OK, intent);
         finish();
     }

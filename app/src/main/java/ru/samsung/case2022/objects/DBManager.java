@@ -34,13 +34,39 @@ public class DBManager {
         createTablesIfNeedBe(tableName);
     }
 
-    public void addProduct(Product product, String tableName) {
+    public Product getProduct(String productName, String tableName) {
+        tableName = tableName.replace(' ', '_');
+        Cursor cursor = db.rawQuery("SELECT * FROM " + tableName + " WHERE NAME = '" + productName + "';", null);
+        boolean hasMoreData = cursor.moveToFirst();
+        while (hasMoreData) {
+            String name = cursor.getString(0);
+            int count = cursor.getInt(1);
+            Product result = new Product(name);
+            result.setCount(count);
+            return result;
+        }
+        Product product = null;
+        return product;
+    }
+
+    public boolean addProduct(Product product, String tableName) {
         tableName = tableName.replace(' ', '_');
         ContentValues values = new ContentValues();
-        values.put("NAME", product.getName());
-        values.put("COUNT", product.getCount());
-        Log.d("SIGN", "saved " + tableName);
-        db.insert(tableName, null, values);
+        Product old = getProduct(product.getName(), tableName);
+        if (old != null) {
+            Log.d("SIGN", String.valueOf(old.getCount()));
+            Product newProduct = new Product(product.getName());
+            newProduct.setCount(old.getCount() + product.getCount());
+            replaceProduct(old, newProduct, tableName);
+            return false;
+        } else {
+            Log.d("SIGN", "YEEEES0");
+            values.put("NAME", product.getName());
+            values.put("COUNT", product.getCount());
+            Log.d("SIGN", "saved " + tableName);
+            db.insert(tableName, null, values);
+            return true;
+        }
     }
 
     public ArrayList<Product> getAllList(String tableName) {

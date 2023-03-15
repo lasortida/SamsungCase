@@ -151,9 +151,18 @@ public class RootActivity extends AppCompatActivity {
                         }
                         Intent intent = result.getData();
                         Product product = (Product) intent.getExtras().get("PRODUCT");
+                        boolean add = (boolean) intent.getExtras().get("ADD");
                         String tableNameCur = intent.getExtras().getString("LIST_NAME");
-                        fullList.add(product);
-                        adapter.notifyItemInserted(fullList.size() - 1);
+                        if (add) {
+                            fullList.add(product);
+                            adapter.notifyItemInserted(fullList.size() - 1);
+                        } else {
+                            Product oldProduct = (Product) intent.getExtras().get("OLD");
+                            int index = fullList.indexOf(oldProduct);
+                            fullList.remove(index);
+                            fullList.add(index, product);
+                            adapter.notifyItemChanged(index);
+                        }
                         if (tableName == null || !tableName.equals(tableNameCur)) {
                             tableName = renameList(tableNameCur);
                             listName.setText(tableName);
@@ -213,6 +222,9 @@ public class RootActivity extends AppCompatActivity {
                                 endOfList();
                             }
                         }
+                    } if (result.getResultCode() == Activity.RESULT_CANCELED) {
+                        String message = (String) result.getData().getExtras().get("MESSAGE");
+                        Snackbar.make(recycler, message, BaseTransientBottomBar.LENGTH_LONG).show();
                     }
                 }
             }

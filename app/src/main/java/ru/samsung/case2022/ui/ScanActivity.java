@@ -67,7 +67,6 @@ public class ScanActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private static DBManager manager;
     private String tableName;
-    private String tempFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +130,7 @@ public class ScanActivity extends AppCompatActivity {
                         if (response.isSuccessful()) {
                             RecResult result = response.body();
                             if (result.naming.length == 0) {
-                                finish();
+                                finishWithError("Фотография плохого качества!");
                             } else {
                                 try {
                                     Product buy = handleResponse(result);
@@ -146,11 +145,11 @@ public class ScanActivity extends AppCompatActivity {
                                     }
                                     getResult(buy);
                                 } catch (Exception e) {
-                                    finish();
+                                    finishWithError("Данный товар не найден в списке!");
                                 }
                             }
                         } else {
-                            finish();
+                            finishWithError("Проблема подключения к серверу!");
                         }
                         preview.setVisibility(View.VISIBLE);
                         message.setVisibility(View.INVISIBLE);
@@ -159,12 +158,7 @@ public class ScanActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<RecResult> call, Throwable t) {
-                        Snackbar.make(recognize, R.string.warning_server, BaseTransientBottomBar.LENGTH_SHORT)
-                                .show();
-                        preview.setVisibility(View.VISIBLE);
-                        message.setVisibility(View.INVISIBLE);
-                        progressBar.setVisibility(View.INVISIBLE);
-                        finish();
+                        finishWithError("Проблема подключения к серверу!");
                     }
                 });
             }
@@ -240,6 +234,13 @@ public class ScanActivity extends AppCompatActivity {
         intent.putExtra("RESTART", false);
         intent.putExtra("BUY_PRODUCT", buy);
         setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    public void finishWithError(String message) {
+        Intent intent = new Intent();
+        intent.putExtra("MESSAGE", message);
+        setResult(RESULT_CANCELED, intent);
         finish();
     }
 }
