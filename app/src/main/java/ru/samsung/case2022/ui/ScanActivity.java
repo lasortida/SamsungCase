@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 
@@ -32,6 +33,7 @@ import android.widget.Toast;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -60,7 +62,7 @@ import ru.samsung.case2022.objects.RecResult;
 
 public class ScanActivity extends AppCompatActivity {
 
-    private ImageView preview;
+    private ImageView preview, help;
     private ActionMenuItemView scan, add;
     private RecognitionService service;
     private MaterialButton recognize, cancel;
@@ -82,6 +84,7 @@ public class ScanActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.topAppBar);
         scan = findViewById(R.id.scan);
         add = findViewById(R.id.add);
+        help = findViewById(R.id.help);
 
         tableName = getIntent().getExtras().getString("LIST_NAME");
 
@@ -112,6 +115,15 @@ public class ScanActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog dialog = new MaterialAlertDialogBuilder(ScanActivity.this)
+                        .setTitle(R.string.title_hints)
+                        .setMessage(R.string.hints).show();
+            }
+        });
 
         resultLauncher.launch(intent);
 

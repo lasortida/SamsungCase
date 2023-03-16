@@ -27,4 +27,6 @@
     <string name="cost_dialog">Цена</string>
     <string name="sample">Наименование товара</string>
     <string name="count_product_sample">x2</string>
+    <string name="title_hints">Советы по использованию</string>
+    <string name="hints">1) Фотографии должны быть сделаны в портретном режиме\n\n2)Ценник должен находиться по центру фотографии</string>
 </resources>

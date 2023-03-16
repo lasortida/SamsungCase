@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.AddProductActivity"
+    android:screenOrientation="portrait"
     android:background="@color/gray">
 
     <com.google.android.material.appbar.AppBarLayout
